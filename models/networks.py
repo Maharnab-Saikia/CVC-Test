@@ -1042,8 +1042,7 @@ class HPB(nn.Module):
             dropout = attn_dropout
         )
 
-        self.pad = nn.ReplicationPad2d(1)
-        self.dwconv = nn.Conv2d(dim, dim, 3, padding = 0, groups = dim)
+        self.dwconv = nn.Conv2d(dim, dim, 3, padding = 1, padding_mode='replicate', groups = dim)
         self.attn_parallel_combine_out = nn.Conv2d(dim * 2, dim, 1)
 
         ff_inner_dim = dim * ff_mult
@@ -1054,8 +1053,7 @@ class HPB(nn.Module):
             nn.GELU(),
             nn.Dropout(ff_dropout),
             Residual(nn.Sequential(
-                nn.ReplicationPad2d(1),
-                nn.Conv2d(ff_inner_dim, ff_inner_dim, 3, padding = 0, groups = ff_inner_dim),
+                nn.Conv2d(ff_inner_dim, ff_inner_dim, 3, padding = 1, padding_mode='replicate', groups = ff_inner_dim),
                 nn.InstanceNorm2d(ff_inner_dim),
                 nn.GELU(),
                 nn.Dropout(ff_dropout)
@@ -1066,7 +1064,7 @@ class HPB(nn.Module):
 
     def forward(self, x):
         attn_branch_out = self.attn(x)
-        conv_branch_out = self.dwconv(self.pad(x))
+        conv_branch_out = self.dwconv(x)
 
         concatted_branches = torch.cat((attn_branch_out, conv_branch_out), dim = 1)
         attn_out = self.attn_parallel_combine_out(concatted_branches) + x
@@ -1180,11 +1178,11 @@ class ATTR(nn.Module):
         ]
 
         model += [
-            nn.Conv2d(ngf, ngf * 2, kernel_size=3, stride=2, padding=1),
+            nn.Conv2d(ngf, ngf * 2, kernel_size=3, stride=2, padding=1, padding_mode='replicate'),
             nn.InstanceNorm2d(ngf * 2),
             nn.GELU(),
     
-            nn.Conv2d(ngf * 2, ngf * 4, kernel_size=3, stride=2, padding=1),
+            nn.Conv2d(ngf * 2, ngf * 4, kernel_size=3, stride=2, padding=1, padding_mode='replicate'),
             nn.InstanceNorm2d(ngf * 4),
             nn.GELU()
         ]
@@ -1204,12 +1202,12 @@ class ATTR(nn.Module):
 
         model += [
             Upsample(ngf * 4),
-            nn.Conv2d(ngf * 4, ngf * 2, kernel_size=3, padding=1),
+            nn.Conv2d(ngf * 4, ngf * 2, kernel_size=3, padding=1, padding_mode='replicate'),
             nn.InstanceNorm2d(ngf * 2),
             nn.GELU(),
 
             Upsample(ngf * 2),
-            nn.Conv2d(ngf * 2, ngf, kernel_size=3, padding=1),
+            nn.Conv2d(ngf * 2, ngf, kernel_size=3, padding=1, padding_mode='replicate'),
             nn.InstanceNorm2d(ngf),
             nn.GELU()
         ]
