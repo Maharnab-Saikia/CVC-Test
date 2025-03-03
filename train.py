@@ -67,11 +67,12 @@ if __name__ == '__main__':
                 #visualizer.print_current_losses(epoch, epoch_iter, float(epoch_iter) / dataset_size, losses, optimize_time, t_data)
 
             iter_data_time = time.time()
+            
 
-        if epoch % opt.save_epoch_freq == 0:              # cache our model every <save_epoch_freq> epochs
+        model.update_learning_rate()                     # update learning rates at the end of every epoch.
+
+        if epoch % opt.save_epoch_freq == 0:             # cache our model every <save_epoch_freq> epochs
             print('Saving the model at the end of epoch %d, iters %d' % (epoch, total_iters))
             model.save_checkpoint(epoch)
 
         print(f"\n[Epoch {epoch}/{opt.n_epochs + opt.n_epochs_decay}] Loss => G: {epoch_g_loss:.4f} | D: {epoch_d_loss:.4f} | NCE: {epoch_nce_loss:.4f} || Time Taken: {int(time.time() - epoch_start_time)} sec")
-
-        model.update_learning_rate()                     # update learning rates at the end of every epoch.
