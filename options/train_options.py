@@ -17,7 +17,7 @@ class TrainOptions(BaseOptions):
         parser.add_argument('--display_env', type=str, default='main', help='visdom display environment name (default is "main")')
         parser.add_argument('--display_port', type=int, default=8097, help='visdom port of the web display')
         parser.add_argument('--update_html_freq', type=int, default=1000, help='frequency of saving training results to html')
-        parser.add_argument('--print_freq', type=int, default=20, help='frequency of showing training results on console')
+        parser.add_argument('--print_freq', type=int, default=1, help='frequency of showing training results on console')
         parser.add_argument('--no_html', type=str, default=True, help='alternative visdom visualization, keep True since we used TensorBoard instead')
         # network saving and loading parameters
         parser.add_argument('--save_latest_freq', type=int, default=5000, help='frequency of saving the latest results')
