@@ -186,7 +186,6 @@ class BaseModel(ABC):
         """Loads model, optimizer, and scheduler states if a checkpoint exists."""
         checkpoint_path = os.path.join(self.save_dir, f'latest_checkpoint_{opt.epoch_count - 1}.pth')
         if os.path.exists(checkpoint_path):
-            print("L")
             checkpoint = torch.load(checkpoint_path, map_location=self.device, weights_only=True)
 
             for name in self.model_names:
@@ -196,8 +195,9 @@ class BaseModel(ABC):
                 optim.load_state_dict(checkpoint['optimizer_state_dict'][i])
 
             for i, sch in enumerate(self.schedulers):
-                print(sch)
+                print(f"Scheduler {i} state:", sch.state_dict())
                 sch.load_state_dict(checkpoint['scheduler_state_dict'][i])
+                print(f"Scheduler {i} state:", sch.state_dict())
 
             print(f"Resumed training from epoch {self.opt.epoch_count}")
         else:
