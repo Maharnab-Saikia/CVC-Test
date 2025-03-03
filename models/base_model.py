@@ -195,9 +195,7 @@ class BaseModel(ABC):
                 optim.load_state_dict(checkpoint['optimizer_state_dict'][i])
 
             for i, sch in enumerate(self.schedulers):
-                print(f"Scheduler {i} state:", sch.state_dict())
                 sch.load_state_dict(checkpoint['scheduler_state_dict'][i])
-                print(f"Scheduler {i} state:", sch.state_dict())
 
             print(f"Resumed training from epoch {self.opt.epoch_count}")
         else:
