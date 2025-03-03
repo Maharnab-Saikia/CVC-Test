@@ -175,7 +175,8 @@ class BaseModel(ABC):
                 else getattr(self, 'net' + name).state_dict()  
                 for name in self.model_names
             },
-            'optimizer_state_dict': {i: optim.state_dict() for i, optim in enumerate(self.optimizers)}
+            'optimizer_state_dict': {i: optim.state_dict() for i, optim in enumerate(self.optimizers)},
+            'scheduler_state_dict': {i: sch.state_dict() for i, sch in enumerate(self.schedulers)}
         }
         checkpoint_path = os.path.join(self.save_dir, f'latest_checkpoint_{epoch}.pth')
         torch.save(checkpoint, checkpoint_path)
