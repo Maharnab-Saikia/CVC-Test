@@ -980,20 +980,12 @@ class LayerNorm(nn.Module):
             x = x * self.gamma.view(*shape) + self.beta.view(*shape)
         return x
 
-###################################################################
+##################################################################################
 
-# helper functions
-
-def exists(val):
-    return val is not None
-
-def default(val, d):
-    return val if exists(val) else d
 
 def l2norm(t):
     return F.normalize(t, p=2, dim=1)
 
-# Helper classes
 
 class Residual(nn.Module):
     def __init__(self, fn):
@@ -1015,7 +1007,6 @@ class ChanLayerNorm(nn.Module):
         mean = torch.mean(x, dim = 1, keepdim = True)
         return (x - mean) / (var + self.eps).sqrt() * self.g + self.b
 
-# classes
 
 class HPB(nn.Module):
     """ Hybrid Perception Block """
@@ -1042,7 +1033,7 @@ class HPB(nn.Module):
             dropout = attn_dropout
         )
 
-        self.dwconv = nn.Conv2d(dim, dim, 3, padding = 1, padding_mode='replicate', groups = dim)
+        self.dwconv = nn.Conv2d(dim, dim, 3, padding = 1, groups = dim)
         self.attn_parallel_combine_out = nn.Conv2d(dim * 2, dim, 1)
 
         ff_inner_dim = dim * ff_mult
@@ -1053,7 +1044,7 @@ class HPB(nn.Module):
             nn.GELU(),
             nn.Dropout(ff_dropout),
             Residual(nn.Sequential(
-                nn.Conv2d(ff_inner_dim, ff_inner_dim, 3, padding = 1, padding_mode='replicate', groups = ff_inner_dim),
+                nn.Conv2d(ff_inner_dim, ff_inner_dim, 3, padding = 1, groups = ff_inner_dim),
                 nn.InstanceNorm2d(ff_inner_dim),
                 nn.GELU(),
                 nn.Dropout(ff_dropout)
@@ -1166,9 +1157,10 @@ class DPSA(nn.Module):
         out = rearrange(out, '(b h) (x y) d -> b (h d) x y', x = h, y = w, h = self.heads)
         return self.to_out(out)
 
+
 class ATTR(nn.Module):
     def __init__(self, input_nc=3, output_nc=3, ngf=64, num_blocks=9):
-        super().__init__()
+        super(ATTR, self).__init__()
 
         model = [
             nn.ReplicationPad2d(3),
@@ -1178,11 +1170,11 @@ class ATTR(nn.Module):
         ]
 
         model += [
-            nn.Conv2d(ngf, ngf * 2, kernel_size=3, stride=2, padding=1, padding_mode='replicate'),
+            nn.Conv2d(ngf, ngf * 2, kernel_size=3, stride=2, padding=1),
             nn.InstanceNorm2d(ngf * 2),
             nn.GELU(),
     
-            nn.Conv2d(ngf * 2, ngf * 4, kernel_size=3, stride=2, padding=1, padding_mode='replicate'),
+            nn.Conv2d(ngf * 2, ngf * 4, kernel_size=3, stride=2, padding=1),
             nn.InstanceNorm2d(ngf * 4),
             nn.GELU()
         ]
@@ -1202,12 +1194,12 @@ class ATTR(nn.Module):
 
         model += [
             Upsample(ngf * 4),
-            nn.Conv2d(ngf * 4, ngf * 2, kernel_size=3, padding=1, padding_mode='replicate'),
+            nn.Conv2d(ngf * 4, ngf * 2, kernel_size=3, padding=1),
             nn.InstanceNorm2d(ngf * 2),
             nn.GELU(),
 
             Upsample(ngf * 2),
-            nn.Conv2d(ngf * 2, ngf, kernel_size=3, padding=1, padding_mode='replicate'),
+            nn.Conv2d(ngf * 2, ngf, kernel_size=3, padding=1),
             nn.InstanceNorm2d(ngf),
             nn.GELU()
         ]

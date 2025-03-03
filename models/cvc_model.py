@@ -105,19 +105,26 @@ class CVCModel(BaseModel):
 
     def optimize_parameters(self):
         # forward
-        self.forward()                   # compute fake images: G(A)
+        self.forward()
+        
         # update D
-        self.set_requires_grad(self.netD, True)  # enable backprop for D
-        self.optimizer_D.zero_grad()     # set D's gradients to zero
-        self.backward_D()                # calculate gradients for D
-        self.optimizer_D.step()          # update D's weights
+        self.set_requires_grad(self.netD, True)
+        self.optimizer_D.zero_grad()
+        self.backward_D()
+        torch.nn.utils.clip_grad_norm_(self.netD.parameters(), max_norm=5.0)
+        self.optimizer_D.step()
+        
         # update G
-        self.set_requires_grad(self.netD, False)  # D requires no gradients when optimizing G
-        self.optimizer_G.zero_grad()        # set G's gradients to zero
+        self.set_requires_grad(self.netD, False)
+        self.optimizer_G.zero_grad()
         if self.opt.netF == 'mlp_sample':
             self.optimizer_F.zero_grad()
-        self.backward_G()                   # calculate graidents for G
-        self.optimizer_G.step()             # udpate G's weights
+        self.backward_G()
+        
+        torch.nn.utils.clip_grad_norm_(self.netG.parameters(), max_norm=5.0)
+        torch.nn.utils.clip_grad_norm_(self.netF.parameters(), max_norm=5.0)
+        
+        self.optimizer_G.step()
         if self.opt.netF == 'mlp_sample':
             self.optimizer_F.step()
 
