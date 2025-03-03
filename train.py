@@ -1,11 +1,14 @@
 import time
 import torch
-from options.train_options import TrainOptions
+import numpy as np
 from data import create_dataset
 from models import create_model
+from options.train_options import TrainOptions
 #from util.visualizer import Visualizer
 #from util.visualizer import writer
-import numpy as np
+
+torch.manual_seed(1337)
+np.random.seed(1337)
 
 
 if __name__ == '__main__':
