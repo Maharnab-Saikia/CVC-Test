@@ -1206,7 +1206,8 @@ class ATTR(nn.Module):
 
         model += [
             nn.ReplicationPad2d(3),
-            nn.Conv2d(ngf, output_nc, kernel_size=7, padding=0)
+            nn.Conv2d(ngf, output_nc, kernel_size=7, padding=0),
+            nn.Tanh()
         ]
 
         self.model = nn.Sequential(*model)

@@ -52,47 +52,12 @@ def trun_spec(y, tlen):
     start = random.choice((range(0, y.shape[0]-tlen)))
     y = y[start:start+tlen, :]
     return y
-    
-# def logmelfilterbank(audio,
-#                      sampling_rate,
-#                      fft_size=1024,
-#                      hop_size=256,
-#                      win_length=None,
-#                      window="hann",
-#                      num_mels=80,
-#                      fmin=None,
-#                      fmax=None,
-#                      eps=1e-10,
-#                      ):
-#     """Compute log-Mel filterbank feature.
 
-#     Args:
-#         audio (ndarray): Audio signal (T,).
-#         sampling_rate (int): Sampling rate.
-#         fft_size (int): FFT size.
-#         hop_size (int): Hop size.
-#         win_length (int): Window length. If set to None, it will be the same as fft_size.
-#         window (str): Window function type.
-#         num_mels (int): Number of mel basis.
-#         fmin (int): Minimum frequency in mel basis calculation.
-#         fmax (int): Maximum frequency in mel basis calculation.
-#         eps (float): Epsilon value to avoid inf in log calculation.
+def encode(x, min=-5.0, max=1.0):
+    return 2.0 * (x - min) / (max - min) - 1.0
 
-#     Returns:
-#         ndarray: Log Mel filterbank feature (#frames, num_mels).
-
-#     """
-#     # get amplitude spectrogram
-#     x_stft = librosa.stft(audio, n_fft=fft_size, hop_length=hop_size,
-#                           win_length=win_length, window=window, pad_mode="reflect")
-#     spc = np.abs(x_stft).T  # (#frames, #bins)
-
-#     # get mel basis
-#     fmin = 0 if fmin is None else fmin
-#     fmax = sampling_rate / 2 if fmax is None else fmax
-#     mel_basis = librosa.filters.mel(sampling_rate, fft_size, num_mels, fmin, fmax)
-
-#     return np.log10(np.maximum(eps, np.dot(spc, mel_basis.T)))
+def decode(y, min=-5.0, max=1.0):
+    return ((y + 1.0) / 2.0) * (max - min) + min
 
 def process_utterance(wav_path,
                       fft_size=1024,
@@ -107,14 +72,12 @@ def process_utterance(wav_path,
                       loud_norm=False,
                       min_level_db=-100,
                       return_linear=False,
-                      trim_long_sil=False, vocoder='pwg',
+                      vocoder='pwg',
                       change_loud=False,
                       loud_range_min=0.9, loud_range_max=1.1):
+
     if isinstance(wav_path, str):
-        if trim_long_sil:
-            wav, _ = trim_long_silences(wav_path, sample_rate)
-        else:
-            wav, _ = librosa.core.load(wav_path, sr=sample_rate)
+    	wav, _ = librosa.core.load(wav_path, sr=sample_rate)
     else:
         wav = wav_path
 
@@ -146,8 +109,7 @@ def process_utterance(wav_path,
             wav = wav / np.abs(wav).max()
 
     # get amplitude spectrogram
-    x_stft = librosa.stft(wav, n_fft=fft_size, hop_length=hop_size,
-                          win_length=win_length, window=window, pad_mode="constant")
+    x_stft = librosa.stft(wav, n_fft=fft_size, hop_length=hop_size, win_length=win_length, window=window, pad_mode="constant")
     spc = np.abs(x_stft)  # (n_bins, T)
 
     # get mel basis
@@ -168,40 +130,9 @@ def process_utterance(wav_path,
     wav = wav[:mel.shape[1] * hop_size]
 
     if not return_linear:
+    	mel = encode(mel)
         return wav, mel
     else:
         spc = audio.amp_to_db(spc)
         spc = audio.normalize(spc, {'min_level_db': min_level_db})
         return wav, mel, spc
-
-# def default_loader(path):
-#     return Image.open(path).convert('RGB')
-
-
-# class ImageFolder(data.Dataset):
-
-#     def __init__(self, root, transform=None, return_paths=False,
-#                  loader=default_loader):
-#         imgs = make_dataset(root)
-#         if len(imgs) == 0:
-#             raise(RuntimeError("Found 0 images in: " + root + "\n"
-#                                "Supported image extensions are: " + ",".join(IMG_EXTENSIONS)))
-
-#         self.root = root
-#         self.imgs = imgs
-#         self.transform = transform
-#         self.return_paths = return_paths
-#         self.loader = loader
-
-#     def __getitem__(self, index):
-#         path = self.imgs[index]
-#         img = self.loader(path)
-#         if self.transform is not None:
-#             img = self.transform(img)
-#         if self.return_paths:
-#             return img, path
-#         else:
-#             return img
-
-#     def __len__(self):
-#         return len(self.imgs)
