@@ -130,7 +130,7 @@ def process_utterance(wav_path,
     wav = wav[:mel.shape[1] * hop_size]
 
     if not return_linear:
-    	mel = encode(mel)
+        mel = encode(mel)
         return wav, mel
     else:
         spc = audio.amp_to_db(spc)
