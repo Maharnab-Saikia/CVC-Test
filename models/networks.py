@@ -1163,7 +1163,7 @@ class ATTR(nn.Module):
         super(ATTR, self).__init__()
 
         model = [
-            nn.ReplicationPad2d(3),
+            nn.ReflectionPad2d(3),
             nn.Conv2d(input_nc, ngf, kernel_size=7, padding=0),
             nn.InstanceNorm2d(ngf),
             nn.GELU()
@@ -1205,7 +1205,7 @@ class ATTR(nn.Module):
         ]
 
         model += [
-            nn.ReplicationPad2d(3),
+            nn.ReflectionPad2d(3),
             nn.Conv2d(ngf, output_nc, kernel_size=7, padding=0),
             nn.Tanh()
         ]
