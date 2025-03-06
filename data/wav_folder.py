@@ -53,10 +53,10 @@ def trun_spec(y, tlen):
     y = y[start:start+tlen, :]
     return y
 
-def encode(x, min=-5.0, max=1.0):
+def encode(x, min=-5.5, max=1.0):
     return 2.0 * (x - min) / (max - min) - 1.0
 
-def decode(y, min=-5.0, max=1.0):
+def decode(y, min=-5.5, max=1.0):
     return ((y + 1.0) / 2.0) * (max - min) + min
 
 def process_utterance(wav_path,
