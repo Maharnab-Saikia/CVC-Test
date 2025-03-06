@@ -112,7 +112,7 @@ class CVCModel(BaseModel):
         self.optimizer_D.zero_grad()
         self.backward_D()
 
-        torch.nn.utils.clip_grad_norm_(self.netD.parameters(), max_norm=5.0)
+        #torch.nn.utils.clip_grad_norm_(self.netD.parameters(), max_norm=5.0)
 
         self.optimizer_D.step()
 
@@ -123,7 +123,7 @@ class CVCModel(BaseModel):
             self.optimizer_F.zero_grad()
         self.backward_G()
 
-        torch.nn.utils.clip_grad_norm_(self.netG.parameters(), max_norm=10.0)
+        #torch.nn.utils.clip_grad_norm_(self.netG.parameters(), max_norm=10.0)
 
         self.optimizer_G.step()
         if self.opt.netF == 'mlp_sample':
